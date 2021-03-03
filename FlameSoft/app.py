@@ -7,8 +7,7 @@ import FlameSoft.fs  as fs
 from FlameSoft.gui import Ui_MainWindow
 from FlameSoft.validator import *
 
-
-# call("pyuic5 gui/gui.ui -o gui/gui.py")
+call("pyuic5 gui/gui.ui -o gui/gui.py")
 
 
 class Form(QtWidgets.QMainWindow):
