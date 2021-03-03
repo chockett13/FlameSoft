@@ -3,7 +3,7 @@ from pathlib import Path
 from sys import argv, exit
 from sys import path as path_
 
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 from cv2 import VideoCapture
 
 folder_path = str(Path(__file__).parent.absolute())
@@ -263,5 +263,6 @@ class GuiFuncs(object):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(argv)
+    app.setWindowIcon(QtGui.QIcon('icon.ico'))
     window = Form()
     exit(app.exec_())
