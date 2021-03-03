@@ -1,14 +1,25 @@
 from os import getcwd, path, mkdir
+from pathlib import Path
 from subprocess import call
 from sys import argv, exit
+from sys import path as path_
 
 from PyQt5 import QtWidgets
+from cv2 import VideoCapture
 
-import FlameSoft.fs  as fs
+folder_path = str(Path(__file__).parent.absolute())
+package_path = str(Path(folder_path).parent.absolute())
+file_path = str(Path(__file__).absolute())
+
+path_.append(file_path)
+path_.append(folder_path)
+path_.append(package_path)
+
+import FlameSoft.fs as fs
 from FlameSoft.gui import Ui_MainWindow
 from FlameSoft.validator import *
 
-call("pyuic5 gui/gui.ui -o gui/gui.py")
+call("pyuic5 gui.ui -o gui.py")
 
 
 class Form(QtWidgets.QMainWindow):
@@ -61,43 +72,56 @@ class Form(QtWidgets.QMainWindow):
     def validation(self):
         self.ui.slices.setValidator(IntVal())
         self.ui.speed.setValidator(IntVal())
+        self.ui.length.setValidator(FloatVal(int_lim=2, fl_lim=2))
         self.ui.ratio.setValidator(FloatVal())
 
     def error_check(self):
 
-        self.funcs.check_filter(text=self.ui.filter.text(), length=int(self.ui.slices.text()), edit_field='filter data')
-        self.funcs.check_filter(text=self.ui.thresh_data.text(), length=int(self.ui.slices.text()),
-                                edit_field='thresh data')
+        e1 = self.funcs.check_filter(text=self.ui.filter.text(), length=int(self.ui.slices.text()),
+                                     edit_field='filter data')
+        e2 = self.funcs.check_filter(text=self.ui.thresh_data.text(), length=int(self.ui.slices.text()),
+                                     edit_field='thresh data')
+        e3 = self.video_check()
+
+        if e1 and e2 and e3:
+            return 1
+        else:
+            return 0
 
     def process(self):
-        self.error_check()
-        try:
-            # Make directory if not exists already
-            self.make_directory()
-            # Index 0 = Right for direction
-            if self.ui.useprevious.currentIndex() == 0:
-                # Try to laod the poinst from the file
-                try:
-                    points = self.funcs.read_txt(str(self.ui.outpath.text()) + r'\bin' + r'\points.txt')
-                # If no file exists raise an error
-                except Exception as _:
-                    self.funcs.error('Please Crop again', 'No stored Data in Directory')
+
+        proceed = self.error_check()
+
+        if proceed:
+
+            try:
+                # Make directory if not exists already
+                self.make_directory()
+                # Index 0 = Right for direction
+                if self.ui.useprevious.currentIndex() == 0:
+                    # Try to laod the poinst from the file
+                    try:
+                        points = self.funcs.read_txt(str(self.ui.outpath.text()) + r'\bin' + r'\points.txt')
+                    # If no file exists raise an error
+                    except Exception as _:
+                        self.funcs.error('Please Crop again', 'No stored Data in Directory')
+                        points = fs.Crop(path=str(self.ui.videopath.text()),
+                                         out=str(self.ui.outpath.text())).crop_video()
+
+                else:
                     points = fs.Crop(path=str(self.ui.videopath.text()), out=str(self.ui.outpath.text())).crop_video()
 
-            else:
-                points = fs.Crop(path=str(self.ui.videopath.text()), out=str(self.ui.outpath.text())).crop_video()
-
-            self.create_object()
-            self.cls.process(breaks=int(self.ui.slices.text()),
-                             filter_size=self.funcs.string_to_list(self.ui.filter.text()),
-                             thresh_val=self.funcs.string_to_list(self.ui.thresh_data.text()),
-                             crop_points=points,
-                             flow_right=int(self.ui.direction.currentIndex()),
-                             height=float(self.ui.ratio.text()),
-                             sub_frame=int(self.ui.subframe.currentIndex())
-                             )
-        except Exception as _:
-            self.funcs.error('Runtime Error', str(_))
+                self.create_object()
+                self.cls.process(breaks=int(self.ui.slices.text()),
+                                 filter_size=self.funcs.string_to_list(self.ui.filter.text()),
+                                 thresh_val=self.funcs.string_to_list(self.ui.thresh_data.text()),
+                                 crop_points=points,
+                                 flow_right=int(self.ui.direction.currentIndex()),
+                                 height=float(self.ui.ratio.text()),
+                                 sub_frame=int(self.ui.subframe.currentIndex())
+                                 )
+            except Exception as _:
+                self.funcs.error('Runtime Error', str(_))
 
     def whiten(self):
         if self.cls is None:
@@ -136,6 +160,15 @@ class Form(QtWidgets.QMainWindow):
             pass
         else:
             mkdir(directory + '/bin')
+
+    def video_check(self):
+
+        cap = VideoCapture(self.ui.videopath.text())
+        success, frame = cap.read()
+        if not success:
+            self.funcs.error('Video Input Error', 'Please check the video path')
+            return 0
+        return 1
 
 
 class GuiFuncs(object):
@@ -226,6 +259,7 @@ class GuiFuncs(object):
 
         if ans == 0:
             GuiFuncs.error('Input Error', statement)
+        return ans
 
 
 if __name__ == '__main__':
