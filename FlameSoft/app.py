@@ -17,7 +17,7 @@ path_.append(package_path)
 
 import FlameSoft.fs as fs
 from FlameSoft.gui import Ui_MainWindow
-from FlameSoft.validator import *
+from FlameSoft.validator import IntVal, FloatVal
 
 call("pyuic5 gui.ui -o gui.py")
 
