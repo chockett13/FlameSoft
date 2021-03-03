@@ -1,8 +1,8 @@
-import os
+from os import path, mkdir
 
 import cv2 as cv2
 import matplotlib.pyplot as plt
-import numpy as np
+from numpy import zeros, save, append, arange, where, hstack, savetxt, linspace
 from pandas import read_csv, Series, DataFrame
 from scipy.optimize import curve_fit
 
@@ -13,7 +13,7 @@ class Crop(object):
         """The crop class to get the pixel values for the cropped image
         path: string array to the path
         """
-        self.path = path
+        self.path_ = path
         self.points = [(), ()]
         self.image = None
         self.out = out
@@ -34,7 +34,7 @@ class Crop(object):
     def crop_video(self):
         """Method to get the cropped points location from the video"""
 
-        cap = cv2.VideoCapture(self.path)
+        cap = cv2.VideoCapture(self.path_)
 
         # Set the frame 1 as image from which it will be cropped
         cap.set(cv2.CAP_PROP_POS_MSEC, 0)
@@ -75,11 +75,11 @@ class Flame(object):
     outpath = ""
     plotpath = ""
 
-    def __init__(self, path: str, out: str):
-        self.path = path
+    def __init__(self, path_: str, out: str):
+        self.path_ = path_
         self.out = out
-        if not os.path.exists(self.out + r'\bin'):
-            os.mkdir(self.out + r'\bin')
+        if not path.exists(self.out + r'\bin'):
+            mkdir(self.out + r'\bin')
         Flame.textpath = self.out + r'\bin' + r'\text.txt'
         Flame.edgepath = self.out + r'\bin' + r'\edge.png'
         Flame.imagepath = self.out + r'\bin' + r'\process.png'
@@ -97,14 +97,15 @@ class Flame(object):
                 raise AssertionError("Length of Filter Size and Thresh Val == Breaks")
 
             # Capture the video
-            cap = cv2.VideoCapture(self.path)
+            cap = cv2.VideoCapture(self.path_)
+
             success, frame = cap.read()
 
             # Rearrage the crop points for left
             crop_points = Points(crop_points)
 
             frame1 = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)[crop_points[0][1]:crop_points[1][1],
-                                  crop_points[0][0]:crop_points[1][0]]
+                     crop_points[0][0]:crop_points[1][0]]
             # Break the image inot parts
             length, width = frame1.shape
             array = self.break_image(breaks, (length, width))
@@ -113,7 +114,7 @@ class Flame(object):
             cap_fcount = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
             cap_fps = cap.get(cv2.CAP_PROP_FPS)
             cap_duration = cap_fcount / cap_fps
-            ans = np.zeros((cap_fcount, crop_points[1][0] - crop_points[0][0]))
+            ans = zeros((cap_fcount, crop_points[1][0] - crop_points[0][0]))
 
             # Make the dictionary of the functions to store the broken images
             fname_ = {}
@@ -213,7 +214,7 @@ class Flame(object):
                 if k == 27:
                     break
             # Save the image to numpy arrray
-            np.save(Flame.arraypath, ans)
+            save(Flame.arraypath, ans)
             cv2.imwrite(Flame.imagepath, ans)
             print('Total Frames =', count_frame)
             cap.release()
@@ -226,7 +227,7 @@ class Flame(object):
     def break_image(num: int, shape: tuple):
         """Method to break the image """
         # Make a array based on number and shape of tuple(shape of image)
-        array = np.append(np.arange(0, shape[1], int(shape[1] / num)), shape[1])
+        array = append(arange(0, shape[1], int(shape[1] / num)), shape[1])
         # Create the empty list to be appended
         ans = []
         # Iterate to get the tuples of slices
@@ -307,15 +308,16 @@ class Flame(object):
         # Run Canny edge detector with default arguments
         edge = cv2.Canny(img, 100, 200)
 
-        # Get the x and y arrays for the edge using np.where
-        x, y = np.where(edge == 255)
-
+        # Get the x and y arrays for the edge using np.where == 255
+        x, y = where(edge == 255)
+        print(x, y)
         # Reshape and  array so that it could be written ( row array to column array)
-        ans = np.hstack([x.reshape(-1, 1), y.reshape(-1, 1)])
+        ans = hstack([x.reshape(-1, 1), y.reshape(-1, 1)])
+        print(ans)
 
         # Write the image to the path
         cv2.imwrite(Flame.edgepath, edge)
-        np.savetxt(Flame.textpath, ans, delimiter=',')
+        savetxt(Flame.textpath, ans, delimiter=',')
 
         return ans
 
@@ -338,7 +340,8 @@ class Flame(object):
         df['Distance (ft)'] = df['XPixel'] * pixel_length
         df['Time (msec)'] = df['Frame'] * 1000 / fps
 
-        x_data = np.linspace(start=df['Time (msec)'][0], stop=df['Time (msec)'][df.index[-1]], num=1000)
+        # smoothed data function
+        x_data = linspace(start=df['Time (msec)'][0], stop=df['Time (msec)'][df.index[-1]], num=1000)
 
         coeff, cov = curve_fit(Flame.func, df['Time (msec)'], df['Distance (ft)'])
 
