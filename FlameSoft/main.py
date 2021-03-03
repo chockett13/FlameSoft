@@ -57,7 +57,7 @@ try:
                 hratio=ws['F16'].value,
                 sub_frame=ws['F17'].value)
     print(vals)
-    cls = fs.Flame(path=vals['path'], out=vals['out'])
+    cls = fs.Flame(path_=vals['path'], out=vals['out'])
 
 except Exception as _:
     print("Error:  ", _)
@@ -76,7 +76,7 @@ try:
                 print("Please recerop the image(error in reading points.txt")
         else:
 
-            points = fs.Crop(path=vals['path'], out=vals['out']).crop_video()
+            points = fs.Crop(path_=vals['path'], out=vals['out']).crop_video()
 
         cls.process(breaks=vals['slices'], filter_size=vals['filter'], thresh_val=vals['thresh'], crop_points=points,
                     flow_right=vals['flow'], height=vals['hratio'], sub_frame=vals['sub_frame'])
