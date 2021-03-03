@@ -9,3 +9,6 @@ FlameSoft/video2.avi
 FlameSoft/__pycache__/
 /Flame.txt
 /FlameSoft/~$FlameSoft.xlsm
+/FlameSoft/bin
+/FlameSoft/dist
+/FlameSoft/built
