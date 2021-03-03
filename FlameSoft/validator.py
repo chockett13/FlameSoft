@@ -13,7 +13,7 @@ class IntVal(QtGui.QValidator):
         # state = 2 Acceptable
 
         # QRegExpValidator object
-        rval = QtGui.QRegExpValidator(QtCore.QRegExp("[1-9]\\d{0,1}"))
+        rval = QtGui.QRegExpValidator(QtCore.QRegExp("[1-9]\\d{0,3}"))
 
         # if there is text and the ourput is acceptable
         if bool(text) and rval.validate(text, 0)[0] == 2:
