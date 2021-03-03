@@ -340,7 +340,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "FlameSoft"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "FlameSoft V1.1"))
         self.direction.setItemText(0, _translate("MainWindow", "Left"))
         self.direction.setItemText(1, _translate("MainWindow", "Right"))
         self.label_6.setText(_translate("MainWindow", "Flame Direction"))
