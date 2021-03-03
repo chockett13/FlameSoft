@@ -1,10 +1,11 @@
 from os import getcwd, path, mkdir
 from sys import argv, exit
 
-import fs as fs
 from PyQt5 import QtWidgets
-from gui import Ui_MainWindow
-from validator import *
+
+import FlameSoft.fs  as fs
+from FlameSoft.gui import Ui_MainWindow
+from FlameSoft.validator import *
 
 
 # call("pyuic5 gui/gui.ui -o gui/gui.py")
