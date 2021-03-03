@@ -263,6 +263,6 @@ class GuiFuncs(object):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(argv)
-    app.setWindowIcon(QtGui.QIcon('icon.ico'))
+    app.setWindowIcon(QtGui.QIcon('./icon.ico'))
     window = Form()
     exit(app.exec_())
