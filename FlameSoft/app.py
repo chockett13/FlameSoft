@@ -1,6 +1,5 @@
 from os import getcwd, path, mkdir
 from pathlib import Path
-from subprocess import call
 from sys import argv, exit
 from sys import path as path_
 
@@ -19,7 +18,7 @@ import FlameSoft.fs as fs
 from FlameSoft.gui import Ui_MainWindow
 from FlameSoft.validator import IntVal, FloatVal
 
-call("pyuic5 gui.ui -o gui.py")
+# call("pyuic5 gui.ui -o gui.py")
 
 
 class Form(QtWidgets.QMainWindow):
